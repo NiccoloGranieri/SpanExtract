@@ -24,13 +24,30 @@ python SpanExtract.py my_file_name.txt
 - This will generate a .txt file called _Parsed.txt_ that contains a span of 10 lines around each marker found. In the original script the markers are different kinds of laughter in a transcript. (LAUGHS, laughs, laughing, chuckles, chuckling, hehe, heh, ehh, thh)
 
 #### _Optional_
+
+##### _Number of Lines in Span_
 If you would like to change the range of lines saved around the found markers, just add a number after the _python_ command. For example, if I wanted only 3 lines before and after the marker, I would type:
 
 ```bash
 python SpanExtract.py my_file_name.txt 3
 ```
 
-If you would like to search for your own markers, just type them one after the other after the number that sets the lines saved, in inverted commas.  For example, if I wanted to set the saved lines to 6 and look for the markers:
+##### _Changing the output mode_
+If you would like to set the script to run, search, and output lines taking into account duplicates, and removing them, resulting in a file with no duplicate lines, you should set the mode to 0. To do so, just put a zero after the number that sets the lines saved.
+
+```bash
+python SpanExtract.py my_file_name.txt 3 0
+```
+
+If instead, you would like to set the script to run, search, and output lines not taking into account duplicates, and printing the span every time a marker is found, you should set the mode to 1. To do so, just put a one after the number that sets the lines saved.
+
+```bash
+python SpanExtract.py my_file_name.txt 3 1
+```
+
+##### _Searching for Personalised Markers_
+
+If you would like to search for your own markers, just type them one after the mode, in inverted commas.  For example, if I wanted to set the saved lines to 6 and look for the markers:
 
 - ((smile))
 - giggle
@@ -39,5 +56,5 @@ If you would like to search for your own markers, just type them one after the o
 then you would type:
 
 ```bash
-python SpanExtract.py my_file_name.txt 6 '((smile))' 'giggle' '(hug)'
+python SpanExtract.py my_file_name.txt 6 0 '((smile))' 'giggle' '(hug)'
 ```

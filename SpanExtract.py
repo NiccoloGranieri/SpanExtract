@@ -19,18 +19,22 @@ except IOError:
 result = open("Parsed.txt","w+")
 
 # If a third argument is identified, that becomes the span
-if len(sys.argv) == 3:
+if len(sys.argv) >= 3:
     span = int(sys.argv[2]) + 1
 else:
     span = 6
+
+# If a fourth argument is identified, that sets the script from not printing out double lines, to printing out double lines
+if len(sys.argv) >= 4:
+    mode = int(sys.argv[3])
 
 tags = []
 defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
 userTags = []
 
 # Switches markers from default to user set
-if len(sys.argv) >= 4:
-    for u in range (3, len(sys.argv)):
+if len(sys.argv) >= 5:
+    for u in range (4, len(sys.argv)):
         userTags.append(sys.argv[u])
     tags = userTags
 else:
@@ -50,12 +54,20 @@ for i, line in enumerate(search):
             min = i - span
             max = i + span
             for i, line in enumerate(open(path)):
-                while i > min and i < max:
-                    if i in lineCount:
-                        break
-                    else:
-                        lineCount.append(i)
-                        result.write(str(i))
-                        result.write(" " + line)
-                        break
+                    if mode == 0:
+                        while i > min and i < max:
+                            if i in lineCount:
+                                break
+                            else:
+                                lineCount.append(i)
+                                result.write(str(i))
+                                result.write(" " + line)
+                                break
+                    elif mode == 1:
+                        while i > min and i < max:
+                            result.write(str(i))
+                            result.write(" " + line)
+                            break
+                        if i == max:
+                            result.write("\n")
 result.close()
