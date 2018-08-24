@@ -24,12 +24,26 @@ if len(sys.argv) == 3:
 else:
     span = 6
 
-tags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
+tags = []
+defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
+userTags = []
+
+# Switches markers from default to user set
+if len(sys.argv) >= 4:
+    for u in range (3, len(sys.argv)):
+        userTags.append(sys.argv[u])
+    tags = userTags
+else:
+    tags = defaultTags
+
+print tags
 
 lineCount = []
 
+print len(tags)
+
 for i, line in enumerate(search):
-    for c in range (0,9):
+    for c in range (0, len(tags)):
         var = tags[c]
         if var in line:
             print ("I found " + var + " on line " + str(i))
