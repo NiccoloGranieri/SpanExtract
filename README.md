@@ -18,3 +18,9 @@ cd /Users/_your_user_name_/Desktop
 python SpanExtract.py my_file_name.txt
 ~~~~
 - This will generate a .txt file called _Parsed.txt_ that contains a span of 10 lines around each marker found. In the original script the markers are different kinds of laughter in a transcript. (LAUGHS, laughs, laughing, chuckles, chuckling, hehe, heh, ehh, thh)
+
+#### _Optional_
+If you would like to change the range of lines saved around the found markers, just add a number after the _python_ command. For example, if I wanted only 3 lines before and after the marker, I would type:
+~~~~
+python SpanExtract.py my_file_name.txt 3
+~~~~
