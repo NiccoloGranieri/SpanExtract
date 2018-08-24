@@ -1,3 +1,12 @@
+question = raw_input("How would you like to name your output file?")
+
+if question != "":
+    # Create and name output file
+    fileName = question + ".txt"
+    result = open(fileName,"w+")
+else:
+    result = open("Parsed.txt", "w+")
+
 import os
 import sys
 
@@ -14,9 +23,6 @@ try:
 except IOError:
     print("Please provide a valid .txt-file.")
     sys.exit()
-
-# Create and name output file
-result = open("Parsed.txt","w+")
 
 # If a third argument is identified, that becomes the span
 if len(sys.argv) >= 3:
