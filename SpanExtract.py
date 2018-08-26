@@ -1,4 +1,4 @@
-question = raw_input("How would you like to name your output file?")
+question = raw_input("How would you like to name your output file?\n")
 
 if question != "":
     # Create and name output file
