@@ -45,6 +45,16 @@ If instead, you would like to set the script to run, search, and output lines no
 python SpanExtract.py my_file_name.txt 3 1
 ```
 
+#### _Looking for a second feature within the line of the node and the one after the next_
+This fourth arguement changes radically the behaviour of the script. By setting the third argument to 1, you ask the script not only to search for lines containing the desired markers, but only output them if the the found span a second feature is found. The second feature, for now, is hard coded, and is the word 'you'.
+
+```bash
+python SpanExtract.py my_file_name.txt 3 1 1
+```
+
+*Note*
+This mode will effectively override both the span and mode arguments previously explained. This mode will always output 4 lines: the line where the marker has been found, one previous line, and the following two lines.
+
 ##### _Searching for Personalised Markers_
 
 If you would like to search for your own markers, just type them one after the mode, in inverted commas.  For example, if I wanted to set the saved lines to 6 and look for the markers:
@@ -56,5 +66,5 @@ If you would like to search for your own markers, just type them one after the m
 then you would type:
 
 ```bash
-python SpanExtract.py my_file_name.txt 6 0 '((smile))' 'giggle' '(hug)'
+python SpanExtract.py my_file_name.txt 6 0 0 '((smile))' 'giggle' '(hug)'
 ```
