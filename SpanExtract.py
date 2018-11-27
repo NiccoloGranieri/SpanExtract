@@ -1,5 +1,5 @@
 # Naming the parsed output file
-question = raw_input("How would you like to name your output file?\n")
+question = input("How would you like to name your output file?\n")
 
 if question != "":
     # Create and name output file
@@ -10,46 +10,56 @@ else:
 
 import os
 import sys
+import argparse
 
-# Read command line argument input file
+parser = argparse.ArgumentParser()
+parser.add_argument("textFile", type=str, help="load a text file")
+parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
+parser.add_argument("--span", help="set the span of lines to extract", type=int)
+parser.add_argument("--duplicates", help="sets the script to print double lines", action="store_true")
+parser.add_argument("--mode", help="sets the mode of the script", type=int)
+
+args = parser.parse_args()
+
+verbose = False
 try:
-    path = sys.argv[1]
+    path = args.textFile
 except IndexError:
     print("Please provide a file name to parse.")
     sys.exit()
-
-# Open file provided in first argument
 try:
     search = open(path)
 except IOError:
     print("Please provide a valid .txt-file.")
     sys.exit()
 
-# If a second argument is identified, that becomes the span
-if len(sys.argv) >= 3:
-    span = int(sys.argv[2]) + 1
-else:
-    span = 6
-
-# If a third argument is identified, that sets the script from not printing out double lines, to printing out double lines
-if len(sys.argv) >= 4:
-    mode = int(sys.argv[3])
-
-# If a fourth argument is identified, that sents the script from printing only markers that contain a certain word in the span
-if len(sys.argv) >= 5:
-    truffleDog = int(sys.argv[4])
-
-verbose = True
-
-if verbose:
+if args.verbose:
+    verbose = True
     def verboseprint(*args):
         # Print each argument separately so caller doesn't need to
         # stuff everything to be printed into a single string
         for arg in args:
-           print arg,
+           print (arg),
         print
 else:   
     verboseprint = lambda *a: None
+
+if args.span:
+    span = args.span
+else:
+    span = 6
+
+if args.duplicates:
+    mode = args.duplicates
+else:
+    mode = 0
+
+if args.mode:
+    truffleDog = args.mode
+else:
+    truffleDog = 0
+
+
 
 tags = []
 defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
