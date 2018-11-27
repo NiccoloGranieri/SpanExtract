@@ -39,6 +39,18 @@ if len(sys.argv) >= 4:
 if len(sys.argv) >= 5:
     truffleDog = int(sys.argv[4])
 
+verbose = True
+
+if verbose:
+    def verboseprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print arg,
+        print
+else:   
+    verboseprint = lambda *a: None
+
 tags = []
 defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
 userTags = []
@@ -51,7 +63,7 @@ if len(sys.argv) >= 6:
 else:
     tags = defaultTags
 
-print tags
+verboseprint(tags)
 
 lineCount = []
 
@@ -66,7 +78,7 @@ for i, line in enumerate(search):
         var = tags[c]
         if var in line:
             if truffleDog == 0:
-                print ("I found " + var + " on line " + str(i))
+                verboseprint ("I found " + var + " on line " + str(i))
                 min = i - span
                 max = i + span
                 for i, line in enumerate(open(path)):
@@ -86,10 +98,8 @@ for i, line in enumerate(search):
                             if i == max:
                                 result.write("\n")
             elif truffleDog == 1:
-                print ("I found that line " + str(i) + " contains one or more " + var)
+                verboseprint ("I found that line " + str(i) + " contains one or more " + var)
                 we = we + 1
-                # print str(we)
-                # print ("Sniffing for truffles on line " + str(i))
                 min = i - 2
                 tag = i
                 max = i + 3
@@ -111,11 +121,11 @@ for i, line in enumerate(search):
                                     truffleFound = False
                         else:
                             if i == tag:
-                                print "There is no \"" + truffle + "\" in line " + str(i)
+                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
                             elif i == tag + 2:
-                                print "There is no \"" + truffle + "\" in line " + str(i)
+                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
                         break
                     if i == max:
                         truffleFound = False
-                        print ""
+                        verboseprint("")
 result.close()
