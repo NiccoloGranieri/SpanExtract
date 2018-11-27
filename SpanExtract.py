@@ -57,9 +57,9 @@ lineCount = []
 
 truffle = 'you'
 
-truffleFound = False
+we = 0
 
-print len(tags)
+truffleFound = False
 
 for i, line in enumerate(search):
     for c in range (0, len(tags)):
@@ -78,7 +78,6 @@ for i, line in enumerate(search):
                                     lineCount.append(i)
                                     result.write(str(i))
                                     result.write(" " + line)
-                                    break
                         elif mode == 1:
                             while i > min and i < max:
                                 result.write(str(i))
@@ -87,7 +86,10 @@ for i, line in enumerate(search):
                             if i == max:
                                 result.write("\n")
             elif truffleDog == 1:
-                print ("Sniffing for truffles on line " + str(i))
+                print ("I found that line " + str(i) + " contains one or more " + var)
+                we = we + 1
+                # print str(we)
+                # print ("Sniffing for truffles on line " + str(i))
                 min = i - 2
                 tag = i
                 max = i + 3
@@ -96,21 +98,24 @@ for i, line in enumerate(search):
                         if truffle in line:
                             if i == tag:
                                 truffleFound = True
-                                break
-                            if i == tag + 2:
+                            elif i == tag + 2:
                                 truffleFound = True
-                                break
                         if truffleFound == True:
-                            for i, line in enumerate(open(path)):
-                                while i > min and i < max:
-                                    result.write(str(i))
+                            for c, line in enumerate(open(path)):
+                                while c > min and c < max:
+                                    result.write(str(c))
                                     result.write(" " + line)
                                     break
-                                if i == max:
+                                if c == max:
                                     result.write("\n")
                                     truffleFound = False
-                                    break
+                        else:
+                            if i == tag:
+                                print "There is no \"" + truffle + "\" in line " + str(i)
+                            elif i == tag + 2:
+                                print "There is no \"" + truffle + "\" in line " + str(i)
                         break
                     if i == max:
-                        break
+                        truffleFound = False
+                        print ""
 result.close()
