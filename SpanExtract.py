@@ -1,57 +1,69 @@
-# Naming the parsed output file
-question = raw_input("How would you like to name your output file?\n")
-
-if question != "":
-    # Create and name output file
-    fileName = question + ".txt"
-    result = open(fileName,"w+")
-else:
-    result = open("Parsed.txt", "w+")
-
 import os
 import sys
+import argparse
 
-# Read command line argument input file
+parser = argparse.ArgumentParser()
+parser.add_argument("textFile", type=str, help="load a text file")
+parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
+parser.add_argument("--span", help="set the span of lines to extract", type=int)
+parser.add_argument("--duplicates", help="sets the script to print double lines", action="store_true")
+parser.add_argument("--mode", help="sets the mode of the script", type=int)
+parser.add_argument("--tags", help="sets the tags to search in the text", type=str, nargs='*')
+
+args = parser.parse_args()
+
+verbose = False
 try:
-    path = sys.argv[1]
+    path = args.textFile
 except IndexError:
     print("Please provide a file name to parse.")
     sys.exit()
-
-# Open file provided in first argument
 try:
     search = open(path)
 except IOError:
     print("Please provide a valid .txt-file.")
     sys.exit()
 
-# If a second argument is identified, that becomes the span
-if len(sys.argv) >= 3:
-    span = int(sys.argv[2]) + 1
+if args.verbose:
+    verbose = True
+    def verboseprint(*args):
+        # Print each argument separately so caller doesn't need to
+        # stuff everything to be printed into a single string
+        for arg in args:
+           print (arg),
+        print
+else:   
+    verboseprint = lambda *a: None
+
+if args.span:
+    span = args.span
 else:
     span = 6
 
-# If a third argument is identified, that sets the script from not printing out double lines, to printing out double lines
-if len(sys.argv) >= 4:
-    mode = int(sys.argv[3])
+if args.duplicates:
+    mode = args.duplicates
+else:
+    mode = 0
 
-# If a fourth argument is identified, that sents the script from printing only markers that contain a certain word in the span
-if len(sys.argv) >= 5:
-    truffleDog = int(sys.argv[4])
+if args.mode:
+    truffleDog = args.mode
+else:
+    truffleDog = 0
 
+
+result = open(args.textFile[:-4] + "_Parsed.txt", "w+")
 tags = []
 defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
 userTags = []
 
-# Switches markers from default to user set
-if len(sys.argv) >= 6:
-    for u in range (5, len(sys.argv)):
-        userTags.append(sys.argv[u])
+if args.tags:
+    for u in range (0, len(args.tags)):
+        userTags.append(args.tags[u])
     tags = userTags
 else:
     tags = defaultTags
 
-print tags
+verboseprint(tags)
 
 lineCount = []
 
@@ -66,7 +78,7 @@ for i, line in enumerate(search):
         var = tags[c]
         if var in line:
             if truffleDog == 0:
-                print ("I found " + var + " on line " + str(i))
+                verboseprint ("I found " + var + " on line " + str(i))
                 min = i - span
                 max = i + span
                 for i, line in enumerate(open(path)):
@@ -86,10 +98,8 @@ for i, line in enumerate(search):
                             if i == max:
                                 result.write("\n")
             elif truffleDog == 1:
-                print ("I found that line " + str(i) + " contains one or more " + var)
+                verboseprint ("I found that line " + str(i) + " contains one or more " + var)
                 we = we + 1
-                # print str(we)
-                # print ("Sniffing for truffles on line " + str(i))
                 min = i - 2
                 tag = i
                 max = i + 3
@@ -111,11 +121,11 @@ for i, line in enumerate(search):
                                     truffleFound = False
                         else:
                             if i == tag:
-                                print "There is no \"" + truffle + "\" in line " + str(i)
+                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
                             elif i == tag + 2:
-                                print "There is no \"" + truffle + "\" in line " + str(i)
+                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
                         break
                     if i == max:
                         truffleFound = False
-                        print ""
+                        verboseprint("")
 result.close()
