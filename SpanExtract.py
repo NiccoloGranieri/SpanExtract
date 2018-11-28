@@ -1,13 +1,3 @@
-# Naming the parsed output file
-question = input("How would you like to name your output file?\n")
-
-if question != "":
-    # Create and name output file
-    fileName = question + ".txt"
-    result = open(fileName,"w+")
-else:
-    result = open("Parsed.txt", "w+")
-
 import os
 import sys
 import argparse
@@ -18,6 +8,7 @@ parser.add_argument("--verbose", help="increase output verbosity", action="store
 parser.add_argument("--span", help="set the span of lines to extract", type=int)
 parser.add_argument("--duplicates", help="sets the script to print double lines", action="store_true")
 parser.add_argument("--mode", help="sets the mode of the script", type=int)
+parser.add_argument("--tags", help="sets the tags to search in the text", type=str, nargs='*')
 
 args = parser.parse_args()
 
@@ -60,15 +51,14 @@ else:
     truffleDog = 0
 
 
-
+result = open(args.textFile[:-4] + "_Parsed.txt", "w+")
 tags = []
 defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
 userTags = []
 
-# Switches markers from default to user set
-if len(sys.argv) >= 6:
-    for u in range (5, len(sys.argv)):
-        userTags.append(sys.argv[u])
+if args.tags:
+    for u in range (0, len(args.tags)):
+        userTags.append(args.tags[u])
     tags = userTags
 else:
     tags = defaultTags
