@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 import argparse
 
 parser = argparse.ArgumentParser()
@@ -10,7 +11,7 @@ parser.add_argument("--span", help="set the span of lines to extract", type=int)
 parser.add_argument("--duplicates", help="sets the script to print double lines", action="store_true")
 parser.add_argument("--mode", help="sets the mode of the script", type=int)
 parser.add_argument("--tags", help="sets the tags to search in the text", type=str, nargs='*')
-parser.add_argument("--featureTwo", help="sets the second feature to search around the tags", type=str)
+parser.add_argument("--featureTwo", help="sets the second feature to search around the tags", type=str, nargs='*')
 
 args = parser.parse_args()
 
@@ -49,17 +50,18 @@ if args.tags:
     tags.clear()
     for u in range (0, len(args.tags)):
         tags.append(args.tags[u])
-verboseprint(tags)
+verboseprint("")
+verboseprint("Tags to look for: " + str(tags) + "\n""")
 
 lineCount = []
 
-defaultSecondFeature = 'you'
-secondFeature = []
+secondFeatures = ['you']
 
 if args.featureTwo:
-    secondFeature = args.featureTwo
-else:
-    secondFeature = defaultSecondFeature
+    secondFeatures.clear()
+    for p in range (0, len(args.featureTwo)):
+        secondFeatures.append(args.featureTwo[p])
+verboseprint("Second Features: " + str(secondFeatures) + "\n""")
 
 tagsFound = 0
 
@@ -68,7 +70,7 @@ featureFound = False
 
 for i, line in enumerate(inputFile):
     for var in tags:
-        if var in line:
+        if re.search(r'\b' + var + '\\b', line):
             if scriptMode == 0:
                 verboseprint ("I found " + var + " on line " + str(i))
                 tagsFound += 1
@@ -97,12 +99,13 @@ for i, line in enumerate(inputFile):
                 tag = i
                 max = i + 3
                 for s, line in enumerate(open(path)):
-                    while s > min and s < max:
-                        if secondFeature in line:
-                            if s == tag:
+                    if s == tag or s == tag + 2:
+                        for secondFeature in secondFeatures:
+                            if re.search(r'\b' + secondFeature + '\\b', line):
                                 featureFound = True
-                            elif s == tag + 2:
-                                featureFound = True
+                                verboseprint("I found \"" + secondFeature + "\" in the requested lines")
+                            else:
+                                verboseprint("There is no \"" + secondFeature + "\" in the requested lines")
                         if featureFound == True:
                             for k, line in enumerate(open(path)):
                                 while k > min and k < max:
@@ -120,12 +123,10 @@ for i, line in enumerate(inputFile):
                                     if considerduplicates == False:
                                         result.write("\n")
                                     featureFound = False
+                                    verboseprint("")
                                     break
                         else:
-                            if s == tag:
-                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(i))
-                            elif s == tag + 2:
-                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(i))
+                            verboseprint("")
                         break
                     if s == max:
                         featureFound = False
