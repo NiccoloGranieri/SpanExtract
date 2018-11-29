@@ -25,6 +25,16 @@ python SpanExtract.py my_file_name.txt
 
 #### _Optional_
 
+--mode = Switches modes of the script.
+    0. Looks for tags and extracts lines around it.
+    1. Looks for tags and extracts lines around it only if a second feature is found in the surrounding lines.
+parser.add_argument("--mode", help="sets the mode of the script", type=int)
+--verbose = Enables verbose mode. Calling it makes it true, not calling it makes it false.
+--span = sets the span of the lines to extract. Default is 6 (5 + 1 + 5). Applies only to mode 0.
+--duplicates = sets the script to print lines that have been printed before. Calling it makes it true, not calling it makes it false
+--tags = sets the tags to search in the text. Applies to both modes.
+--featureTwo = sets the second feature to search around the tags. Applies only to mode 1.
+
 ##### _Number of Lines in Span_
 If you would like to change the range of lines saved around the found markers, just add a number after the _python_ command. For example, if I wanted only 3 lines before and after the marker, I would type:
 

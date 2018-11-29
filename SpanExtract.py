@@ -3,129 +3,132 @@ import sys
 import argparse
 
 parser = argparse.ArgumentParser()
+
 parser.add_argument("textFile", type=str, help="load a text file")
 parser.add_argument("--verbose", help="increase output verbosity", action="store_true")
 parser.add_argument("--span", help="set the span of lines to extract", type=int)
 parser.add_argument("--duplicates", help="sets the script to print double lines", action="store_true")
 parser.add_argument("--mode", help="sets the mode of the script", type=int)
 parser.add_argument("--tags", help="sets the tags to search in the text", type=str, nargs='*')
+parser.add_argument("--featureTwo", help="sets the second feature to search around the tags", type=str)
 
 args = parser.parse_args()
 
-verbose = False
 try:
     path = args.textFile
 except IndexError:
     print("Please provide a file name to parse.")
     sys.exit()
 try:
-    search = open(path)
+    inputFile = open(path)
 except IOError:
     print("Please provide a valid .txt-file.")
     sys.exit()
 
-if args.verbose:
-    verbose = True
-    def verboseprint(*args):
-        # Print each argument separately so caller doesn't need to
-        # stuff everything to be printed into a single string
-        for arg in args:
-           print (arg),
-        print
-else:   
-    verboseprint = lambda *a: None
+verboseprint = print if args.verbose else lambda *a, **k: None
 
 if args.span:
-    span = args.span
+    span = args.span + 1
 else:
     span = 6
 
 if args.duplicates:
-    mode = args.duplicates
+    considerduplicates = True
 else:
-    mode = 0
+    considerduplicates = False
 
 if args.mode:
-    truffleDog = args.mode
+    scriptMode = args.mode
 else:
-    truffleDog = 0
-
+    scriptMode = 0
 
 result = open(args.textFile[:-4] + "_Parsed.txt", "w+")
-tags = []
-defaultTags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
-userTags = []
+tags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
 
 if args.tags:
+    tags.clear()
     for u in range (0, len(args.tags)):
-        userTags.append(args.tags[u])
-    tags = userTags
-else:
-    tags = defaultTags
-
+        tags.append(args.tags[u])
 verboseprint(tags)
 
 lineCount = []
 
-truffle = 'you'
+defaultSecondFeature = 'you'
+secondFeature = []
 
-we = 0
+if args.featureTwo:
+    secondFeature = args.featureTwo
+else:
+    secondFeature = defaultSecondFeature
 
-truffleFound = False
+tagsFound = 0
 
-for i, line in enumerate(search):
-    for c in range (0, len(tags)):
-        var = tags[c]
+featureFound = False
+
+
+for i, line in enumerate(inputFile):
+    for var in tags:
         if var in line:
-            if truffleDog == 0:
+            if scriptMode == 0:
                 verboseprint ("I found " + var + " on line " + str(i))
+                tagsFound += 1
                 min = i - span
                 max = i + span
-                for i, line in enumerate(open(path)):
-                        if mode == 0:
-                            while i > min and i < max:
-                                if i in lineCount:
-                                    break
-                                else:
-                                    lineCount.append(i)
-                                    result.write(str(i))
-                                    result.write(" " + line)
-                        elif mode == 1:
-                            while i > min and i < max:
-                                result.write(str(i))
-                                result.write(" " + line)
-                                break
-                            if i == max:
+                for e, line in enumerate(open(path)):
+                    while e > min and e < max:
+                        if len(lineCount) >= 1:
+                            spaceSeeker = int(e) - int(lineCount[-1])
+                            if spaceSeeker >= 2:
                                 result.write("\n")
-            elif truffleDog == 1:
+                        if considerduplicates and e in lineCount:
+                            break
+                        lineCount.append(e)
+                        result.write(str(e))
+                        result.write(" " + line)
+                        break
+                    if e == max:
+                        if considerduplicates == False:
+                            result.write("\n")
+                        break
+            elif scriptMode == 1:
                 verboseprint ("I found that line " + str(i) + " contains one or more " + var)
-                we = we + 1
+                tagsFound += 1
                 min = i - 2
                 tag = i
                 max = i + 3
-                for i, line in enumerate(open(path)):
-                    while i > min and i < max:
-                        if truffle in line:
-                            if i == tag:
-                                truffleFound = True
-                            elif i == tag + 2:
-                                truffleFound = True
-                        if truffleFound == True:
-                            for c, line in enumerate(open(path)):
-                                while c > min and c < max:
-                                    result.write(str(c))
+                for s, line in enumerate(open(path)):
+                    while s > min and s < max:
+                        if secondFeature in line:
+                            if s == tag:
+                                featureFound = True
+                            elif s == tag + 2:
+                                featureFound = True
+                        if featureFound == True:
+                            for k, line in enumerate(open(path)):
+                                while k > min and k < max:
+                                    if len(lineCount) >= 1:
+                                        spaceSeeker = int(k) - int(lineCount[-1])
+                                        if spaceSeeker >= 2:
+                                            result.write("\n")
+                                    if considerduplicates and i in lineCount:
+                                        break
+                                    lineCount.append(k)
+                                    result.write(str(k))
                                     result.write(" " + line)
                                     break
-                                if c == max:
-                                    result.write("\n")
-                                    truffleFound = False
+                                if k == max:
+                                    if considerduplicates == False:
+                                        result.write("\n")
+                                    featureFound = False
+                                    break
                         else:
-                            if i == tag:
-                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
-                            elif i == tag + 2:
-                                verboseprint("There is no \"" + truffle + "\" in line " + str(i))
+                            if s == tag:
+                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(i))
+                            elif s == tag + 2:
+                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(i))
                         break
-                    if i == max:
-                        truffleFound = False
+                    if s == max:
+                        featureFound = False
                         verboseprint("")
+verboseprint ("I found a total of " + str(tagsFound) + " tags")
 result.close()
