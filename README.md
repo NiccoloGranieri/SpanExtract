@@ -28,7 +28,6 @@ python SpanExtract.py my_file_name.txt
 --mode = Switches modes of the script.
     0. Looks for tags and extracts lines around it.
     1. Looks for tags and extracts lines around it only if a second feature is found in the surrounding lines.
-parser.add_argument("--mode", help="sets the mode of the script", type=int)
 --verbose = Enables verbose mode. Calling it makes it true, not calling it makes it false.
 --span = sets the span of the lines to extract. Default is 6 (5 + 1 + 5). Applies only to mode 0.
 --duplicates = sets the script to print lines that have been printed before. Calling it makes it true, not calling it makes it false
