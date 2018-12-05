@@ -137,15 +137,15 @@ for inputFile in openFile:
                                             spaceSeeker = int(k) - int(lineCount[-1])
                                             if spaceSeeker >= 2:
                                                 result.write("\n")
-                                        if considerduplicates and i in lineCount:
-                                            break
+                                        # if considerduplicates and i in lineCount:
+                                        #     break
                                         lineCount.append(k)
                                         result.write(str(k))
                                         result.write(" " + line)
                                         break
                                     if k == max:
-                                        if considerduplicates == False:
-                                            result.write("\n")
+                                        # if considerduplicates == False:
+                                        result.write("\n")
                                         featureFound = False
                                         verboseprint("")
                                         break
