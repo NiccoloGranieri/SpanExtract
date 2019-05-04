@@ -27,11 +27,6 @@ if args.fileParsing:
     except IndexError:
         print("Please provide a file name to parse.")
         sys.exit()
-    try:
-        openFile = [path]
-    except IOError:
-        print("Please provide a valid .txt-file.")
-        sys.exit()
 
 if args.folderParsing:
     folder = args.folderParsing
@@ -60,6 +55,18 @@ else:
     scriptMode = 0
 
 tags = ['((LAUGHS))', '((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
+tagsDict =	{
+    '((LAUGHS))': 0,
+    '((laughs))': 0,
+    '((laughing))': 0,
+    '((chuckles))': 0,
+    '((chuckling))': 0,
+    '((hehe))': 0,
+    '((heh))': 0,
+    '((ehh))': 0,
+    '((thh))': 0
+}
+
 
 if args.tags:
     tags.clear()
@@ -93,10 +100,13 @@ for inputFile in openFile:
     result = open(inputFile[:-4] + "_Parsed.txt", "w+")
     for i, line in enumerate(open(inputFile)):
         for var in tags:
+            resetTag = 0
             if re.search(r'\b' + var + '\\b', line):
                 if scriptMode == 0: # Mode 0
                     verboseprint ("I found " + var + " on line " + str(i))
                     tagsFound += 1
+                    if var in tagsDict:
+                        tagsDict[var] += 1
                     min = i - span
                     max = i + span
                     for e, line in enumerate(open(inputFile)):
@@ -133,11 +143,14 @@ for inputFile in openFile:
                                                 counts[word] += 1
                                             else:
                                                 counts[word] = 1
-                                        verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s)) 
-                                        if counts[secondFeature] > 1:
-                                            featureFound = True
-                                        else:
-                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        try:
+                                            verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
+                                            if counts[secondFeature] > 1:
+                                                featureFound = True
+                                            else:
+                                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        except:
+                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
                                     else:
                                         if re.search(r'\b' + secondFeature + '\\b', line):
                                             featureFound = True
@@ -184,11 +197,14 @@ for inputFile in openFile:
                                                 counts[word] += 1
                                             else:
                                                 counts[word] = 1
-                                        verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s)) 
-                                        if counts[secondFeature] > 1:
-                                            featureFound = True
-                                        else:
-                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        try:
+                                            verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
+                                            if counts[secondFeature] > 1:
+                                                featureFound = True
+                                            else:
+                                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        except:
+                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
                                     else:
                                         if re.search(r'\b' + secondFeature + '\\b', line):
                                             featureFound = True
@@ -235,11 +251,14 @@ for inputFile in openFile:
                                                 counts[word] += 1
                                             else:
                                                 counts[word] = 1
-                                        verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s)) 
-                                        if counts[secondFeature] > 1:
-                                            featureFound = True
-                                        else:
-                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        try:
+                                            verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
+                                            if counts[secondFeature] > 1:
+                                                featureFound = True
+                                            else:
+                                                verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
+                                        except:
+                                            verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
                                     else:
                                         if re.search(r'\b' + secondFeature + '\\b', line):
                                             featureFound = True
@@ -286,4 +305,5 @@ for inputFile in openFile:
                         #     featureFound = False
                         #     verboseprint("")
 verboseprint ("I found a total of " + str(tagsFound) + " tags")
+verboseprint(tagsDict)
 result.close()
