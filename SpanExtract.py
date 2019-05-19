@@ -27,10 +27,7 @@ spaceSeeker = 0
 printedSpans = 0
 ignoredTags = 0
 lastLinePrinted = -1
-# Unused Variables
-# tagsFound = 0
-# featureFound = False
-
+lastSpanPrinted = -1
 
 verboseprint = print if args.verbose else lambda *a, **k: None
 
@@ -93,7 +90,6 @@ if args.output:
 else:
     pass
         
-# Function Declaration
 def initOut(fileName, fileType, fileIndex):
     # Initialises output file
     if fileType == 'xls':
@@ -187,27 +183,21 @@ if __name__ == '__main__':
                         if i < len(fileLines) - 1: nextLineDict = lineDictionary(fileLines[i+1].lower())
                         if i < len(fileLines) - 2: lastLineDict = lineDictionary(fileLines[i+2].lower())
                         dictsToParse = identifySubmode(submode)
-                        # if considerduplicates == False:
-                        #     tagsInLine = hitLineDict[tag]
-                        # else:
                         tagsInLine = 1
                         ignoredTags += hitLineDict[tag] - tagsInLine
                         for k in range (tagsInLine):
                             verboseprint ("I found " + tag + " on line " + str(i))
                             if lookingForFeatureTwo(dictsToParse, secondFeatures):
-                                for line in range(min, max + 1):
-                                    if line >= 0 and line < len(fileLines) and line not in lineCount:
-                                        # if considerduplicates:
-                                        #     if line == min and lastLinePrinted < line and lineCount != []:
-                                        #         parsedFile.write("\n")
-                                        #     lineCount.append(line)
-                                        parsedFile.write(str(line))
-                                        parsedFile.write(" " + fileLines[line])
-                                        lastLinePrinted = line
-                                # if considerduplicates == False:
-                                parsedFile.write("\n")
-                                printedSpans += 1
-
+                                if considerduplicates == True and i == lastSpanPrinted:
+                                    pass
+                                else:
+                                    for line in range(min, max + 1):
+                                        if line >= 0 and line < len(fileLines) and line not in lineCount:
+                                            parsedFile.write(str(line))
+                                            parsedFile.write(" " + fileLines[line])
+                                    parsedFile.write("\n")
+                                    lastSpanPrinted = i
+                                    printedSpans += 1
     verboseprint("I found " + str(hits) + " tags in total.")
     verboseprint("I printed " + str(printedSpans) + " spans in the text file.")
     verboseprint("I ignored " + str(ignoredTags) + " tags in total.")
