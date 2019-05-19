@@ -26,6 +26,7 @@ lineCount = []
 spaceSeeker = 0
 printedSpans = 0
 ignoredTags = 0
+lastLinePrinted = -1
 # Unused Variables
 # tagsFound = 0
 # featureFound = False
@@ -74,6 +75,8 @@ if args.tags:
     verboseprint("")
     verboseprint("Tags to look for: " + str(tags) + "\n""")
 
+secondFeatures = ['((laughs))', '((laughing))', '((chuckles))', '((chuckling))', '((hehe))', '((heh))', '((ehh))', '((thh))']
+
 if args.featureTwo:
     secondFeatures.clear()
     for p in range (0, len(args.featureTwo)):
@@ -83,7 +86,7 @@ if args.featureTwo:
 if args.subMode:
     submode = args.subMode
 else:
-    submode = 1
+    submode = 1.1
 
 if args.output:
     fileOut = args.output
@@ -121,6 +124,25 @@ def lineDictionary(line):
             wordHits[word] = 1
     return(wordHits)
 
+def identifySubmode(modeParser):
+    if modeParser == 1:
+        dictsToParse = [hitLineDict, lastLineDict]
+        return dictsToParse
+    elif modeParser == 2:
+        dictsToParse = [hitLineDict, nextLineDict]
+        return dictsToParse
+    elif modeParser == 3:
+        dictsToParse = [hitLineDict, nextLineDict, lastLineDict]
+        return dictsToParse
+
+def lookingForFeatureTwo(dictsToSearch, secondFeatures):
+    for secondFeature in secondFeatures:
+        for d in range(0, len(dictsToParse)):
+            if secondFeature in dictsToParse[d]:
+                verboseprint ("    I found " + secondFeature + " around line  " + str(i))
+                return True
+    return False
+
 if __name__ == '__main__':
     for inputFile in openFile:
         verboseprint("Looking at file number " + str(inputFile) + " in folder...") 
@@ -128,251 +150,65 @@ if __name__ == '__main__':
         # fileName = os.path.basename(inputFile[:-4])
         fileLines = textLineParsing(inputFile)
         for i in range(len(fileLines)):
-            wordLineDict = lineDictionary(fileLines[i].lower())
+            hitLineDict = lineDictionary(fileLines[i].lower())
             for tag in tags:
-                if tag in wordLineDict:
+                if tag in hitLineDict:
+                    hits += hitLineDict[tag]
                     
                     # MODE 0
                     if scriptMode == 0:
                         verboseprint ("I found " + tag + " on line " + str(i))
-                        hits += wordLineDict[tag]
-                        if considerduplicates:
-                            tagsInLine = wordLineDict[tag]
+                        min = i - span
+                        max = i + span
+                        if considerduplicates == False:
+                            tagsInLine = hitLineDict[tag]
                         else:
                             tagsInLine = 1
-                            ignoredTags += wordLineDict[tag] - tagsInLine
+                            ignoredTags += hitLineDict[tag] - tagsInLine
                         for k in range (tagsInLine):
                             verboseprint ("I found " + tag + " on line " + str(i))
-                            min = i - span
-                            max = i + span
                             for line in range(min, max + 1):
-                                if line >= 0 and line < len(fileLines):
-                                    if line == i: parsedFile.write("-")
+                                if line >= 0 and line < len(fileLines) and line not in lineCount:
+                                    if considerduplicates:
+                                        if line == min and lastLinePrinted < line and lineCount != []:
+                                            parsedFile.write("\n")
+                                        lineCount.append(line)
                                     parsedFile.write(str(line))
                                     parsedFile.write(" " + fileLines[line])
+                                    lastLinePrinted = line
+                            if considerduplicates == False:
+                                parsedFile.write("\n")
                             printedSpans += 1
-                            parsedFile.write("\n")
-    
+                                    
+                    # MODE 1 INCLUDING SUBMODES
+                    elif scriptMode == 1:
+                        min = i - 1
+                        max = i + 2
+                        if i < len(fileLines) - 1: nextLineDict = lineDictionary(fileLines[i+1].lower())
+                        if i < len(fileLines) - 2: lastLineDict = lineDictionary(fileLines[i+2].lower())
+                        dictsToParse = identifySubmode(submode)
+                        # if considerduplicates == False:
+                        #     tagsInLine = hitLineDict[tag]
+                        # else:
+                        tagsInLine = 1
+                        ignoredTags += hitLineDict[tag] - tagsInLine
+                        for k in range (tagsInLine):
+                            verboseprint ("I found " + tag + " on line " + str(i))
+                            if lookingForFeatureTwo(dictsToParse, secondFeatures):
+                                for line in range(min, max + 1):
+                                    if line >= 0 and line < len(fileLines) and line not in lineCount:
+                                        # if considerduplicates:
+                                        #     if line == min and lastLinePrinted < line and lineCount != []:
+                                        #         parsedFile.write("\n")
+                                        #     lineCount.append(line)
+                                        parsedFile.write(str(line))
+                                        parsedFile.write(" " + fileLines[line])
+                                        lastLinePrinted = line
+                                # if considerduplicates == False:
+                                parsedFile.write("\n")
+                                printedSpans += 1
+
     verboseprint("I found " + str(hits) + " tags in total.")
     verboseprint("I printed " + str(printedSpans) + " spans in the text file.")
     verboseprint("I ignored " + str(ignoredTags) + " tags in total.")
-
-
-            
-        
-
-# for inputFile in openFile:
-    
-    # inputFile = path
-    # This should accept both .txt and .xls outputs
-    # result = open(inputFile[:-4] + "_Parsed.txt", "w+")
-
-#     for i, line in enumerate(open(inputFile)):
-#         for var in tags:
-#             resetTag = 0
-#             if re.search(r'\b' + var + '\\b', line):
-
-#                 if scriptMode == 0: # Mode 0
-#                     verboseprint ("I found " + var + " on line " + str(i))
-#                     tagsFound += 1
-#                     min = i - span
-#                     max = i + span
-#                     for e, line in enumerate(open(inputFile)):
-#                         while e > min and e < max:
-#                             if len(lineCount) >= 1:
-#                                 spaceSeeker = int(e) - int(lineCount[-1])
-#                                 if spaceSeeker >= 2:
-#                                     result.write("\n")
-#                             if considerduplicates and e in lineCount:
-#                                 break
-#                             lineCount.append(e)
-#                             result.write(str(e))
-#                             result.write(" " + line)
-#                             break
-#                         if e == max:
-#                             if considerduplicates == False:
-#                                 result.write("\n")
-#                             break
-
-#                 elif scriptMode == 1: # Mode 1
-#                     verboseprint ("I found that line " + str(i) + " contains one or more " + var)
-#                     tagsFound += 1
-#                     min = i - 2
-#                     tag = i
-#                     max = i + 3
-#                     for s, line in enumerate(open(inputFile)):
-#                         if submode == 1: # Submode 1 -> TODO explicit copy past to fix
-#                             if s == tag:
-#                                 for secondFeature in secondFeatures:
-#                                     if secondFeature == var:
-#                                         counts = dict()
-#                                         words = line.split()
-#                                         for word in words:
-#                                             if word in counts:
-#                                                 counts[word] += 1
-#                                             else:
-#                                                 counts[word] = 1
-#                                         try:
-#                                             verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
-#                                             if counts[secondFeature] > 1:
-#                                                 featureFound = True
-#                                             else:
-#                                                 verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
-#                                         except:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         if re.search(r'\b' + secondFeature + '\\b', line):
-#                                             featureFound = True
-#                                             verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                         else:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                             if s == tag + 2:
-#                                 for secondFeature in secondFeatures:
-#                                     if re.search(r'\b' + secondFeature + '\\b', line):
-#                                         featureFound = True
-#                                         verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                 if featureFound == True:                            
-#                                     for k, line in enumerate(open(inputFile)):
-#                                         while k > min and k < max:
-#                                             if len(lineCount) >= 1:
-#                                                 spaceSeeker = int(k) - int(lineCount[-1])
-#                                                 if spaceSeeker >= 2:
-#                                                     result.write("\n")
-#                                             # if considerduplicates and i in lineCount:
-#                                             #     break
-#                                             lineCount.append(k)
-#                                             result.write(str(k))
-#                                             result.write(" " + line)
-#                                             break
-#                                         if k == max:
-#                                             # if considerduplicates == False:
-#                                             result.write("\n")
-#                                             featureFound = False
-#                                             verboseprint("")
-#                                             break
-#                                 else:
-#                                     verboseprint("")
-#                                 break
-#                         elif submode == 2: # Submode 2 -> TODO explicit copy past to fix
-#                             if s == tag:
-#                                 for secondFeature in secondFeatures:
-#                                     if secondFeature == var:
-#                                         counts = dict()
-#                                         words = line.split()
-#                                         for word in words:
-#                                             if word in counts:
-#                                                 counts[word] += 1
-#                                             else:
-#                                                 counts[word] = 1
-#                                         try:
-#                                             verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
-#                                             if counts[secondFeature] > 1:
-#                                                 featureFound = True
-#                                             else:
-#                                                 verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
-#                                         except:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         if re.search(r'\b' + secondFeature + '\\b', line):
-#                                             featureFound = True
-#                                             verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                         else:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                             if s == tag + 1:
-#                                 for secondFeature in secondFeatures:
-#                                     if re.search(r'\b' + secondFeature + '\\b', line):
-#                                         featureFound = True
-#                                         verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                 if featureFound == True:                            
-#                                     for k, line in enumerate(open(inputFile)):
-#                                         while k > min and k < max:
-#                                             if len(lineCount) >= 1:
-#                                                 spaceSeeker = int(k) - int(lineCount[-1])
-#                                                 if spaceSeeker >= 2:
-#                                                     result.write("\n")
-#                                             # if considerduplicates and i in lineCount:
-#                                             #     break
-#                                             lineCount.append(k)
-#                                             result.write(str(k))
-#                                             result.write(" " + line)
-#                                             break
-#                                         if k == max:
-#                                             # if considerduplicates == False:
-#                                             result.write("\n")
-#                                             featureFound = False
-#                                             verboseprint("")
-#                                             break
-#                                 else:
-#                                     verboseprint("")
-#                                 break
-#                         elif submode == 3: # Submode 3 -> TODO explicit copy past to fix
-#                             if s == tag:
-#                                 for secondFeature in secondFeatures:
-#                                     if secondFeature == var:
-#                                         counts = dict()
-#                                         words = line.split()
-#                                         for word in words:
-#                                             if word in counts:
-#                                                 counts[word] += 1
-#                                             else:
-#                                                 counts[word] = 1
-#                                         try:
-#                                             verboseprint("I found " + str(counts[secondFeature]) + " occurrances of \"" + secondFeature + "\" in line " + str(s))
-#                                             if counts[secondFeature] > 1:
-#                                                 featureFound = True
-#                                             else:
-#                                                 verboseprint("There is no \"" + secondFeature + "\" in line " + str(s) + " other than the main searched tag")
-#                                         except:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         if re.search(r'\b' + secondFeature + '\\b', line):
-#                                             featureFound = True
-#                                             verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                         else:
-#                                             verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                             if s == tag + 1:
-#                                 for secondFeature in secondFeatures:
-#                                     if re.search(r'\b' + secondFeature + '\\b', line):
-#                                         featureFound = True
-#                                         verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                             if s == tag + 2:
-#                                 for secondFeature in secondFeatures:
-#                                     if re.search(r'\b' + secondFeature + '\\b', line):
-#                                         featureFound = True
-#                                         verboseprint("I found \"" + secondFeature + "\" in line " + str(s))
-#                                     else:
-#                                         verboseprint("There is no \"" + secondFeature + "\" in line " + str(s))
-#                                 if featureFound == True:                            
-#                                     for k, line in enumerate(open(inputFile)):
-#                                         while k > min and k < max:
-#                                             if len(lineCount) >= 1:
-#                                                 spaceSeeker = int(k) - int(lineCount[-1])
-#                                                 if spaceSeeker >= 2:
-#                                                     result.write("\n")
-#                                             # if considerduplicates and i in lineCount:
-#                                             #     break
-#                                             lineCount.append(k)
-#                                             result.write(str(k))
-#                                             result.write(" " + line)
-#                                             break
-#                                         if k == max:
-#                                             # if considerduplicates == False:
-#                                             result.write("\n")
-#                                             featureFound = False
-#                                             verboseprint("")
-#                                             break
-#                                 else:
-#                                     verboseprint("")
-#                                 break
-#                         # if s == max:
-#                         #     featureFound = False
-#                         #     verboseprint("")
-# verboseprint ("I found a total of " + str(tagsFound) + " tags")
-# verboseprint(tagsDict)
-# result.close()
+    parsedFile.close()
