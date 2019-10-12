@@ -3,6 +3,7 @@ import sys
 import re
 import argparse
 
+
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font
 
@@ -41,7 +42,7 @@ verboseprint = print if args.verbose else lambda *a, **k: None
 
 if args.fileParsing:
     try:
-        openfile = args.fileParsing
+        openFile[0] = args.fileParsing
     except IndexError:
         print("Please provide a file name to parse.")
         sys.exit()
@@ -199,67 +200,68 @@ def writeToSheet(totalNumber, lineNumber, fileName, speaker, line, linePlusOne, 
         cell = sheet1.cell(row = totalNumber + 1, column = (lastCol + 1) + i, value = instanceCount[features[i]])
         columnCount = (lastCol + 1) + i
     cell = sheet1.cell(row = totalNumber + 1, column = (columnCount + 1), value = sum)
-    excelSheet.save(filename = "File Cluster.xlsx")
+    # excelSheet.save(filename = "File Cluster.xlsx")
 
 if __name__ == '__main__':
     for inputFile in openFile:
-        verboseprint("Looking at file number " + str(inputFile) + " in folder...") 
-        if scriptMode != 2: parsedFile = open(inputFile[:-4] + "_Parsed.txt", "w+")
-        # fileName = os.path.basename(inputFile[:-4])
+        verboseprint("Looking at file number " + str(inputFile) + " in folder...")
         fileLines = textLineParsing(inputFile)
-        for i in range(len(fileLines)):
-            hitLineDict = lineDictionary(fileLines[i].lower())
-            for tag in tags:
-                if tag in hitLineDict:
-                    hits += hitLineDict[tag]
-                    
-                    # MODE 0
-                    if scriptMode == 0:
-                        verboseprint ("I found " + tag + " on line " + str(i))
-                        min = i - span
-                        max = i + span
-                        if considerduplicates == False:
-                            tagsInLine = hitLineDict[tag]
-                        else:
+        if scriptMode != 2: 
+            parsedFile = open(inputFile[:-4] + "_Parsed.txt", "w+")
+            # fileName = os.path.basename(inputFile[:-4])
+            for i in range(len(fileLines)):
+                hitLineDict = lineDictionary(fileLines[i].lower())
+                for tag in tags:
+                    if tag in hitLineDict:
+                        hits += hitLineDict[tag]
+                        
+                        # MODE 0
+                        if scriptMode == 0:
+                            verboseprint ("I found " + tag + " on line " + str(i))
+                            min = i - span
+                            max = i + span
+                            if considerduplicates == False:
+                                tagsInLine = hitLineDict[tag]
+                            else:
+                                tagsInLine = 1
+                                ignoredTags += hitLineDict[tag] - tagsInLine
+                            for k in range (tagsInLine):
+                                verboseprint ("I found " + tag + " on line " + str(i))
+                                for line in range(min, max + 1):
+                                    if line >= 0 and line < len(fileLines) and line not in lineCount:
+                                        if considerduplicates:
+                                            if line == min and lastLinePrinted < line and lineCount != []:
+                                                parsedFile.write("\n")
+                                            lineCount.append(line)
+                                        parsedFile.write(str(line))
+                                        parsedFile.write(" " + fileLines[line])
+                                        lastLinePrinted = line
+                                if considerduplicates == False:
+                                    parsedFile.write("\n")
+                                printedSpans += 1
+                                        
+                        # MODE 1 INCLUDING SUBMODES
+                        elif scriptMode == 1:
+                            min = i - 1
+                            max = i + 2
+                            if i < len(fileLines) - 1: nextLineDict = lineDictionary(fileLines[i+1].lower())
+                            if i < len(fileLines) - 2: lastLineDict = lineDictionary(fileLines[i+2].lower())
+                            dictsToParse = identifySubmode(submode, 'txt')
                             tagsInLine = 1
                             ignoredTags += hitLineDict[tag] - tagsInLine
-                        for k in range (tagsInLine):
-                            verboseprint ("I found " + tag + " on line " + str(i))
-                            for line in range(min, max + 1):
-                                if line >= 0 and line < len(fileLines) and line not in lineCount:
-                                    if considerduplicates:
-                                        if line == min and lastLinePrinted < line and lineCount != []:
-                                            parsedFile.write("\n")
-                                        lineCount.append(line)
-                                    parsedFile.write(str(line))
-                                    parsedFile.write(" " + fileLines[line])
-                                    lastLinePrinted = line
-                            if considerduplicates == False:
-                                parsedFile.write("\n")
-                            printedSpans += 1
-                                    
-                    # MODE 1 INCLUDING SUBMODES
-                    elif scriptMode == 1:
-                        min = i - 1
-                        max = i + 2
-                        if i < len(fileLines) - 1: nextLineDict = lineDictionary(fileLines[i+1].lower())
-                        if i < len(fileLines) - 2: lastLineDict = lineDictionary(fileLines[i+2].lower())
-                        dictsToParse = identifySubmode(submode, 'txt')
-                        tagsInLine = 1
-                        ignoredTags += hitLineDict[tag] - tagsInLine
-                        for k in range (tagsInLine):
-                            verboseprint ("I found " + tag + " on line " + str(i))
-                            if lookingForFeatureTwo(dictsToParse, secondFeatures):
-                                if considerduplicates == True and i == lastSpanPrinted:
-                                    pass
-                                else:
-                                    for line in range(min, max + 1):
-                                        if line >= 0 and line < len(fileLines) and line not in lineCount:
-                                            parsedFile.write(str(line))
-                                            parsedFile.write(" " + fileLines[line])
-                                    parsedFile.write("\n")
-                                    lastSpanPrinted = i
-                                    printedSpans += 1
+                            for k in range (tagsInLine):
+                                verboseprint ("I found " + tag + " on line " + str(i))
+                                if lookingForFeatureTwo(dictsToParse, secondFeatures):
+                                    if considerduplicates == True and i == lastSpanPrinted:
+                                        pass
+                                    else:
+                                        for line in range(min, max + 1):
+                                            if line >= 0 and line < len(fileLines) and line not in lineCount:
+                                                parsedFile.write(str(line))
+                                                parsedFile.write(" " + fileLines[line])
+                                        parsedFile.write("\n")
+                                        lastSpanPrinted = i
+                                        printedSpans += 1
 
         if scriptMode == 2:
             if inputFile == openFile[0]:
@@ -298,7 +300,7 @@ if __name__ == '__main__':
                 mergedCell = sheet1.cell(row = (totalLinesCount + 2) - singleFileLinesCount, column = 3)
                 mergedCell.alignment = Alignment(vertical='center')
             singleFileLinesCount = 0
-            excelSheet.save(filename = "File Cluster.xlsx")
+    excelSheet.save(filename = "File Cluster.xlsx")
     verboseprint("I found " + str(hits) + " tags in total.")
     verboseprint("I printed " + str(printedSpans) + " spans in the text file.")
     verboseprint("I ignored " + str(ignoredTags) + " tags in total.")
